@@ -82,13 +82,14 @@ def handle_click(mx, my):
     c, r = mx // GRID_SIZE, my // GRID_SIZE
     if not (0 <= c < COLS and 0 <= r < ROWS):
         return
-    if mode == TRAVELING and c < 14 and r < 5:
+    if mode == TRAVELING and c < 14 and r < 5:  #prevents object on HUD
         return
  
     if mode == SELECT_START:
         if grid[r][c] == 1:
             return 
         start_grid = (c, r)
+     #converting
         rover_x = c * GRID_SIZE + GRID_SIZE // 2
         rover_y = r * GRID_SIZE + GRID_SIZE // 2
         mode = SELECT_GOAL
@@ -103,11 +104,12 @@ def handle_click(mx, my):
  
     elif mode == TRAVELING:
         
-        if (c, r) == goal_grid:
+        if (c, r) == goal_grid: #the goal shouldnt be obstacle
             return
-        if grid[r][c] == 0:
+        if grid[r][c] == 0: #obstacle only on empty cell
             grid[r][c] = 1
             remaining = set(path[path_index:])
+            #Dynamic rerouting
             if (c, r) in remaining or (c, r) == start_grid:
                 current_rover_grid = (int(rover_x // GRID_SIZE), int(rover_y // GRID_SIZE))
                 path = a_star(current_rover_grid, goal_grid)
@@ -139,8 +141,8 @@ while running:
         pygame.draw.circle(screen, GREEN, (goal_grid[0] * GRID_SIZE + GRID_SIZE // 2, goal_grid[1] * GRID_SIZE + GRID_SIZE // 2), 10)
  
     if mode == TRAVELING and path_index < len(path):
-        target_x = path[path_index][0] * GRID_SIZE + GRID_SIZE // 2
-        target_y = path[path_index][1] * GRID_SIZE + GRID_SIZE // 2
+        target_x = path[path_index][0] * GRID_SIZE + GRID_SIZE // 2   #checks here are still path points remaining
+        target_y = path[path_index][1] * GRID_SIZE + GRID_SIZE // 2  
  
         dx = target_x - rover_x
         dy = target_y - rover_y
@@ -159,13 +161,13 @@ while running:
                 rx = int(rover_x + math.cos(rad) * ray_len)
                 ry = int(rover_y + math.sin(rad) * ray_len)
                 c, r = rx // GRID_SIZE, ry // GRID_SIZE
-                if 0 <= c < COLS and 0 <= r < ROWS and grid[r][c] == 1:
+                if 0 <= c < COLS and 0 <= r < ROWS and grid[r][c] == 1:  #in the sensor hitting an obstacle
                     pygame.draw.line(screen, RED, (rover_x, rover_y), (rx, ry), 1)
                     break
                 elif ray_len == 59:
                     pygame.draw.line(screen, BLUE, (rover_x, rover_y), (rx, ry), 1)
  
-        pygame.draw.circle(screen, WHITE, (int(rover_x), int(rover_y)), 8)
+        pygame.draw.circle(screen, WHITE, (int(rover_x), int(rover_y)), 8)  #draw rover
  
     if mode == SELECT_START:
         status_text = "CLICK TO SET START POINT"
@@ -182,7 +184,7 @@ while running:
     ]
     pygame.draw.rect(screen, (10, 10, 10), (5, 5, 320, 85))
     pygame.draw.rect(screen, GREEN, (5, 5, 320, 85), 1)  
-    for i, line in enumerate(telemetry):
+    for i, line in enumerate(telemetry):  #puts text on scrn
         text_surface = font.render(line, True, GREEN)
         screen.blit(text_surface, (12, 12 + i * 18))
  
